@@ -61,6 +61,7 @@ Environnement : Linux, Python 3.13, Node 22, PostgreSQL 17.
 | Construction et démarrage réels des images Docker | Registres d'images bloqués dans l'environnement de développement | CI GitHub (job `images`) ou Docker Desktop |
 | Semgrep, Gitleaks, Trivy | Registres de règles et d'images bloqués | CI GitHub |
 | Exécution de la CI GitHub elle-même | Dépôt pas encore poussé sur GitHub | Après création du dépôt distant |
+| Installation et tests sur le poste Windows | Disque C: plein (0 Go libre) : `npm ci` échoue avec `ENOSPC`. Python 3.11 installé alors que l'API exige 3.13 ; Docker absent | Libérer au moins 3 Go, installer Python 3.13 (ou Docker Desktop, qui demande plus d'espace), puis suivre le `README.md` |
 
 ## 7. Statut
 
