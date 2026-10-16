@@ -1,0 +1,66 @@
+@startuml INTEYLO_composants
+skinparam shadowing false
+skinparam componentStyle rectangle
+title INTEYLO — Diagramme de composants (monolithe modulaire)
+
+actor "Utilisateur" as U
+cloud "Systèmes externes" as EXT
+
+package "apps/web (Next.js)" {
+  [Interface web\n(catalogue fr)] as WEB
+}
+
+package "apps/api (FastAPI)" {
+  [Couche API\nvalidation, erreurs fr] as API
+  [Identité et politiques\nsessions, RBAC, contexte tenant] as IAM
+  [Organisations\net membres] as ORG
+  [Audit] as AUD
+  [Centre des connecteurs] as CON
+  [Ingestion\net normalisation] as ING
+  [Graphe métier] as BG
+  [Référentiel des indicateurs] as MET
+  [Preuves et sources] as EVI
+  [Moteur d'actions\net politiques] as ACT
+  [Mémoire décisionnelle] as MEM
+  [Abstraction IA] as AI
+}
+
+package "workers" {
+  [Synchronisation] as WSYNC
+  [Processus et\nvérifications] as WFLOW
+}
+
+database "PostgreSQL\n(RLS par organisation)" as DB
+queue "File de tâches" as Q
+
+U --> WEB
+WEB --> API : HTTPS / JSON
+API --> IAM
+IAM --> ORG
+IAM --> AUD
+API --> CON
+CON --> ING
+ING --> BG
+BG --> MET
+MET --> EVI
+API --> ACT
+ACT --> IAM : contrôle des politiques
+ACT --> AUD
+ACT --> MEM
+AI --> EVI
+AI ..> ACT : propose seulement
+ORG --> DB
+AUD --> DB
+ING --> DB
+ACT --> Q
+Q --> WFLOW
+Q --> WSYNC
+WSYNC --> EXT
+WFLOW --> EXT
+EXT --> API : livraisons signées
+
+note right of IAM
+  Phase 1 : implémenté.
+  Tout le reste : cible des phases 2 à 4.
+end note
+@enduml

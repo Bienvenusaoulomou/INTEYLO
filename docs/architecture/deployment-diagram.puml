@@ -1,0 +1,48 @@
+@startuml INTEYLO_deploiement
+skinparam shadowing false
+skinparam defaultTextAlignment center
+title INTEYLO — Diagramme de déploiement (serveur unique, Docker Compose)\ndocker-compose.yml + docker-compose.prod.yml
+
+actor "Utilisateur" as USER
+node "Navigateur" as BR
+cloud "Sources externes\n(webhooks signés)" as SRC
+cloud "API tierces\net fournisseurs IA" as EXT
+
+node "Serveur Linux — Docker Engine" as HOST {
+  frame "réseau edge (80/443 publiés)" as EDGE {
+    component "proxy\nCaddy 2, TLS automatique" as PROXY
+  }
+  frame "réseau app (interne)" as APPNET {
+    component "web\nNext.js standalone, uid 1001" as WEB
+    component "api\nUvicorn/FastAPI, uid 10001" as API
+    component "migrate\nAlembic, exécution unique" as MIG
+    component "worker\nphase 2" as WORKER
+  }
+  frame "réseau data (internal: true)" as DATANET {
+    database "postgres 17\nvolume pgdata" as PG
+  }
+  folder "secrets Docker\n/run/secrets/*" as SEC
+}
+storage "Sauvegardes pg_dump\nchiffrées, hors serveur" as BACKUP
+
+USER --> BR
+BR --> PROXY : HTTPS 443
+SRC --> PROXY : HTTPS 443\n/api/v1/ingest
+PROXY --> WEB : /
+PROXY --> API : /api/* (préfixe retiré)
+API --> PG : 5432\nrôle inteylo_app (RLS)
+MIG --> PG : 5432\nrôle inteylo_owner
+WORKER --> PG
+WORKER --> EXT : HTTPS sortant
+SEC ..> API
+SEC ..> MIG
+SEC ..> PG
+PG ..> BACKUP : quotidien
+
+note right of PG
+  Aucun port publié en production.
+  L'API refuse de démarrer si son rôle
+  est superutilisateur, BYPASSRLS
+  ou propriétaire des tables.
+end note
+@enduml

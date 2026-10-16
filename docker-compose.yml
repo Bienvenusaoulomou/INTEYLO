@@ -1,0 +1,86 @@
+# INTEYLO — environnement de développement.
+#   cp .env.example .env    (puis ajuster les mots de passe)
+#   docker compose up --build
+# Web : http://localhost:3000 · API : http://localhost:8000/docs
+# Production : docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+name: inteylo
+
+x-api-env: &api-env
+  INTEYLO_ENVIRONMENT: ${INTEYLO_ENVIRONMENT:-development}
+  INTEYLO_DATABASE_URL: postgresql+psycopg://inteylo_app:${INTEYLO_APP_PASSWORD:-}@postgres:5432/${INTEYLO_DB_NAME:-inteylo}
+  INTEYLO_COOKIE_SECURE: ${INTEYLO_COOKIE_SECURE:-false}
+  INTEYLO_PUBLIC_WEB_URL: ${INTEYLO_PUBLIC_WEB_URL:-http://localhost:3000}
+  INTEYLO_LOG_LEVEL: ${INTEYLO_LOG_LEVEL:-INFO}
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      INTEYLO_OWNER_PASSWORD: ${INTEYLO_OWNER_PASSWORD:-}
+      INTEYLO_APP_PASSWORD: ${INTEYLO_APP_PASSWORD:-}
+      INTEYLO_DB_NAME: ${INTEYLO_DB_NAME:-inteylo}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5432:5432" # local uniquement ; jamais publié en production
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${INTEYLO_DB_NAME:-inteylo}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    build: { context: ./apps/api }
+    image: ${INTEYLO_IMAGE_PREFIX:-inteylo}/api:${INTEYLO_VERSION:-dev}
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      INTEYLO_MIGRATION_DATABASE_URL: postgresql+psycopg://inteylo_owner:${INTEYLO_OWNER_PASSWORD}@postgres:5432/${INTEYLO_DB_NAME:-inteylo}
+      INTEYLO_APP_DB_ROLE: inteylo_app
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [data]
+    restart: "no"
+
+  api:
+    image: ${INTEYLO_IMAGE_PREFIX:-inteylo}/api:${INTEYLO_VERSION:-dev}
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    ports:
+      - "127.0.0.1:8000:8000"
+    networks: [app, data]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+
+  web:
+    build:
+      context: ./apps/web
+      args:
+        API_INTERNAL_URL: http://api:8000
+    image: ${INTEYLO_IMAGE_PREFIX:-inteylo}/web:${INTEYLO_VERSION:-dev}
+    depends_on:
+      api: { condition: service_healthy }
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks: [app]
+    read_only: true
+    tmpfs: [/tmp, /app/.next/cache]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+
+networks:
+  app: {}
+  data: {}
+
+volumes:
+  pgdata: {}

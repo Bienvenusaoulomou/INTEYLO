@@ -1,0 +1,102 @@
+@startuml INTEYLO_cas_utilisation
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+title INTEYLO — Diagramme de cas d'utilisation (niveau général)
+
+actor "Super-administrateur\nde la plateforme" as SuperAdmin
+actor "Propriétaire\nde l'organisation" as Owner
+actor "Administrateur\nde l'organisation" as Admin
+actor "Analyste" as Analyst
+actor "Opérateur" as Operator
+actor "Lecteur" as Viewer
+actor "Approbateur" as Approver
+actor "Systèmes externes" as External <<système>>
+actor "Fournisseur d'identité" as IdP <<système>>
+
+Owner -|> Admin
+Admin -|> Viewer
+Analyst -|> Viewer
+Operator -|> Viewer
+
+rectangle "Plateforme SaaS INTEYLO" {
+  usecase "S'authentifier\net gérer sa session" as UC_Auth
+  usecase "Gérer les organisations\n(suspension, incidents)" as UC_Orgs
+  usecase "Inviter un membre" as UC_Invite
+  usecase "Gérer les membres,\nrôles et permissions" as UC_RBAC
+  usecase "Configurer les modules\net connecteurs" as UC_Connect
+  usecase "Synchroniser et normaliser\nles données" as UC_Ingest
+  usecase "Explorer les données\net le graphe métier" as UC_Explore
+  usecase "Consulter les indicateurs\net rapports" as UC_Reports
+  usecase "Produire une analyse\navec preuves" as UC_Analyze
+  usecase "Consulter les preuves\net sources" as UC_Evidence
+  usecase "Détecter opportunités\net anomalies" as UC_Insights
+  usecase "Simuler une décision" as UC_Simulate
+  usecase "Préparer un plan d'action" as UC_Plan
+  usecase "Vérifier les politiques\net permissions" as UC_Policy
+  usecase "Approuver ou refuser\nune action" as UC_Approve
+  usecase "Exécuter une action\nexterne" as UC_Execute
+  usecase "Vérifier le résultat\nréel de l'action" as UC_Verify
+  usecase "Reprendre une action\nau résultat incertain" as UC_Resume
+  usecase "Consulter la mémoire\ndécisionnelle" as UC_Memory
+  usecase "Consulter l'audit\net les incidents" as UC_Audit
+  usecase "Gérer la facturation\net l'abonnement" as UC_Billing
+}
+
+SuperAdmin --> UC_Orgs
+SuperAdmin --> UC_Audit
+Owner --> UC_Billing
+Admin --> UC_Invite
+Admin --> UC_RBAC
+Admin --> UC_Connect
+Admin --> UC_Audit
+Analyst --> UC_Explore
+Analyst --> UC_Analyze
+Analyst --> UC_Insights
+Analyst --> UC_Simulate
+Analyst --> UC_Plan
+Operator --> UC_Plan
+Operator --> UC_Execute
+Viewer --> UC_Auth
+Viewer --> UC_Reports
+Viewer --> UC_Memory
+Approver --> UC_Approve
+
+UC_Invite ..> UC_Policy : <<include>>
+UC_RBAC ..> UC_Policy : <<include>>
+UC_Connect ..> UC_Ingest : <<include>>
+UC_Analyze ..> UC_Explore : <<include>>
+UC_Analyze ..> UC_Evidence : <<include>>
+UC_Insights ..> UC_Analyze : <<include>>
+UC_Plan ..> UC_Policy : <<include>>
+UC_Approve ..> UC_Policy : <<include>>
+UC_Execute ..> UC_Policy : <<include>>
+UC_Execute ..> UC_Verify : <<include>>
+UC_Approve ..> UC_Plan : <<extend>>
+UC_Resume ..> UC_Verify : <<extend>>
+UC_Simulate ..> UC_Plan : <<extend>>
+
+External --> UC_Ingest
+External --> UC_Verify
+UC_Execute --> External
+IdP --> UC_Auth
+
+note bottom of UC_Execute
+  Soumise aux permissions, aux règles de risque,
+  aux approbations et aux capacités du connecteur.
+  Une réponse HTTP réussie ne vaut pas vérification.
+end note
+
+note bottom of UC_Resume
+  Point d'extension : résultat « incertain ».
+  L'état est relu auprès du système externe
+  avant toute nouvelle tentative.
+end note
+
+note right of Approver
+  Rôle fonctionnel : toute personne
+  disposant de la permission
+  actions.approve (par délégation).
+end note
+@enduml

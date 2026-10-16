@@ -1,0 +1,30 @@
+# Reverse proxy de production : TLS automatique (Let's Encrypt) pour INTEYLO_DOMAIN.
+{
+	email {$INTEYLO_ACME_EMAIL}
+}
+
+{$INTEYLO_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# L'API publie ses routes sans préfixe (/v1/...) : le préfixe /api est retiré ici.
+	handle_path /api/* {
+		request_body {
+			max_size 2MB
+		}
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

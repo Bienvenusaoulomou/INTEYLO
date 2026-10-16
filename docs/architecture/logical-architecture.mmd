@@ -1,0 +1,82 @@
+%% INTEYLO — Architecture logique (monolithe modulaire + workers)
+%% Légende : trait plein = appel synchrone ; pointillé = événement ou tâche asynchrone.
+%% Les modules marqués (P1) existent dans le code ; les autres sont la cible des phases 2 à 5.
+flowchart TB
+  subgraph PRES["Présentation — Next.js (apps/web)"]
+    UI_AUTH["Connexion, inscription, invitation (P1)"]
+    UI_ORG["Organisation, membres, audit (P1)"]
+    UI_PLAT["Plateforme (P1)"]
+    UI_NEXT["Connecteurs, données, assistant, actions, mémoire"]
+  end
+
+  subgraph API["API — FastAPI (apps/api)"]
+    MW["Middlewares : journal JSON, en-tête anti-CSRF, CORS, erreurs FR (P1)"]
+    R_AUTH["/v1/auth (P1)"]
+    R_ORG["/v1/organizations/{id} (P1)"]
+    R_INV["/v1/invitations (P1)"]
+    R_PLAT["/v1/platform (P1)"]
+    R_ING["/v1/ingest/{source}"]
+  end
+
+  subgraph POL["Identité et politiques"]
+    IDENT["identity : sessions opaques, Argon2 (P1)"]
+    RBAC["authorization : RBAC + contexte tenant (P1)"]
+    POLICY["policy_engine : règles ABAC des actions"]
+  end
+
+  subgraph DOM["Domaine et orchestration"]
+    ORGS["organizations (P1)"]
+    CONN["connectors"]
+    ING["ingestion"]
+    CANON["canonical_data"]
+    GRAPH["business_graph"]
+    METRIC["metrics"]
+    EVID["evidence"]
+    OPP["opportunities"]
+    SIM["decision_simulator"]
+    AI["ai_assistant"]
+    ACT["action_registry + approvals + workflows"]
+    VERIF["execution_verifier"]
+    MEM["decision_memory"]
+  end
+
+  AUDIT["audit : journal en ajout seul (P1)"]
+
+  subgraph WRK["Workers asynchrones"]
+    W_SYNC["sync"]
+    W_FLOW["workflows"]
+    W_ANA["analytics"]
+  end
+
+  subgraph DATA["Données"]
+    PG[("PostgreSQL + RLS (P1)")]
+    OBJ[("Stockage objet S3")]
+    VAULT[("Secrets chiffrés")]
+  end
+
+  EXT["Systèmes externes"]
+  LLM["Fournisseurs de modèles IA"]
+
+  PRES --> MW --> R_AUTH & R_ORG & R_INV & R_PLAT & R_ING
+  R_AUTH --> IDENT
+  R_ORG --> RBAC --> ORGS
+  R_INV --> ORGS
+  R_PLAT --> RBAC
+  R_ING --> ING
+  ORGS --> AUDIT
+  IDENT --> AUDIT
+  RBAC --> AUDIT
+  ING --> CANON --> GRAPH
+  CANON --> METRIC --> EVID
+  METRIC --> OPP
+  AI --> METRIC & EVID & GRAPH & MEM
+  AI -. propose .-> ACT
+  ACT --> POLICY
+  ACT -. tâche .-> W_FLOW --> CONN --> EXT
+  W_FLOW --> VERIF --> MEM
+  CONN -. tâche .-> W_SYNC --> ING
+  OPP -. calcul .-> W_ANA
+  AI --> LLM
+  CONN --> VAULT
+  IDENT & ORGS & AUDIT & ING & MEM --> PG
+  ING --> OBJ

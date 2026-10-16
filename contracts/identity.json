@@ -1,0 +1,136 @@
+{
+  "$comment": "Contrat partagé phase 1. Le backend (tests/test_contracts.py) et le frontend (scripts/check-i18n.mjs) vérifient en CI qu'ils restent alignés sur ce fichier. Les libellés français vivent dans apps/web/messages/fr.json.",
+  "version": "1.1.0",
+  "organizationRoles": [
+    "org_owner",
+    "org_admin",
+    "analyst",
+    "operator",
+    "viewer"
+  ],
+  "platformRoles": [
+    "platform_super_admin"
+  ],
+  "organizationPermissions": [
+    "organizations.read",
+    "organizations.manage",
+    "users.read",
+    "users.invite",
+    "users.manage",
+    "roles.read",
+    "roles.manage",
+    "connectors.read",
+    "connectors.configure",
+    "analytics.read",
+    "analytics.run",
+    "reports.create",
+    "actions.propose",
+    "actions.approve",
+    "actions.execute",
+    "memory.read",
+    "memory.manage",
+    "audit.read",
+    "billing.manage"
+  ],
+  "platformPermissions": [
+    "platform.organizations.read",
+    "platform.organizations.suspend",
+    "platform.audit.read"
+  ],
+  "auditActions": [
+    "auth.signup",
+    "auth.login",
+    "auth.logout",
+    "auth.session_revoked",
+    "auth.other_sessions_revoked",
+    "organization.created",
+    "organization.updated",
+    "organization.access",
+    "permission.check",
+    "member.roles_updated",
+    "member.roles_update",
+    "member.disabled",
+    "member.enabled",
+    "invitation.created",
+    "invitation.create",
+    "invitation.revoked",
+    "invitation.accepted",
+    "platform.access",
+    "platform.admin_promoted",
+    "platform.organization_suspended",
+    "platform.organization_reactivated"
+  ],
+  "auditOutcomes": [
+    "success",
+    "denied",
+    "failure"
+  ],
+  "invitationStatuses": [
+    "pending",
+    "accepted",
+    "revoked",
+    "expired"
+  ],
+  "memberStatuses": [
+    "active",
+    "disabled"
+  ],
+  "organizationStatuses": [
+    "active",
+    "suspended"
+  ],
+  "actionStates": [
+    "REQUESTED",
+    "POLICY_CHECKED",
+    "AWAITING_APPROVAL",
+    "APPROVED",
+    "EXECUTING",
+    "EXECUTED",
+    "VERIFIED",
+    "FAILED",
+    "REJECTED",
+    "CANCELLED",
+    "UNCERTAIN"
+  ],
+  "errorCodes": [
+    "validation_error",
+    "malformed_request",
+    "authentication_required",
+    "invalid_credentials",
+    "too_many_attempts",
+    "email_already_used",
+    "csrf_header_missing",
+    "permission_denied",
+    "organization_not_found",
+    "organization_suspended",
+    "member_not_found",
+    "unknown_role",
+    "role_not_assignable",
+    "member_not_manageable",
+    "cannot_modify_self",
+    "last_owner",
+    "already_member",
+    "invitation_pending",
+    "invitation_invalid",
+    "invitation_not_found",
+    "invitation_email_mismatch",
+    "invitation_login_required",
+    "session_not_found",
+    "not_found",
+    "method_not_allowed",
+    "service_unavailable",
+    "internal_error"
+  ],
+  "connectorStates": [
+    "available",
+    "incomplete",
+    "auth_required",
+    "connected",
+    "syncing",
+    "synced",
+    "sync_error",
+    "auth_expired",
+    "limited",
+    "disabled"
+  ]
+}

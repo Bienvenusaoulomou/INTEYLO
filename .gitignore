@@ -1,0 +1,31 @@
+# Secrets et configuration locale
+.env
+.env.*
+!.env.example
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+next-env.d.ts
+
+# Systèmes
+.DS_Store
+Thumbs.db

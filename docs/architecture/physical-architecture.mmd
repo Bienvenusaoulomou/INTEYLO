@@ -1,0 +1,35 @@
+%% INTEYLO — Architecture physique (hébergement initial : un serveur Linux, Docker Compose)
+%% Correspond à docker-compose.yml et docker-compose.prod.yml (racine du dépôt).
+flowchart TB
+  USER["Navigateur"]
+  SRC["Sources externes (webhooks signés)"]
+  EXTAPI["API tierces et fournisseurs IA"]
+
+  subgraph HOST["Serveur Linux — Docker Engine"]
+    subgraph EDGE["réseau edge (seul exposé : 80/443)"]
+      PROXY["proxy — Caddy 2, TLS automatique"]
+    end
+    subgraph APP["réseau app (interne)"]
+      WEB["web — Next.js standalone, uid 1001"]
+      API["api — Uvicorn, uid 10001"]
+      MIG["migrate — job Alembic (une fois par déploiement)"]
+      WORKER["worker — phase 2"]
+    end
+    subgraph DATA["réseau data (internal: true)"]
+      PG[("postgres 17 — volume pgdata")]
+    end
+    SECRETS[/"secrets Docker : db_password, app_db_password"/]
+    BACKUP[/"sauvegardes pg_dump chiffrées — hors serveur"/]
+  end
+
+  USER -- "HTTPS 443" --> PROXY
+  SRC -- "HTTPS 443 /api/v1/ingest" --> PROXY
+  PROXY -- "/" --> WEB
+  PROXY -- "/api/*" --> API
+  WEB -- "rendu serveur" --> API
+  API -- "5432, rôle inteylo_app (RLS)" --> PG
+  MIG -- "5432, rôle propriétaire" --> PG
+  WORKER --> PG
+  WORKER -- "HTTPS sortant" --> EXTAPI
+  SECRETS -.-> API & PG & MIG
+  PG -. "pg_dump quotidien" .-> BACKUP

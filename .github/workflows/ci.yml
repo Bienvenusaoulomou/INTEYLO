@@ -1,0 +1,185 @@
+# CI INTEYLO — étapes 1 à 14 du §17 du prompt maître. Tous les contrôles sont bloquants.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api:
+    name: API — lint, types, tests, sécurité
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    defaults:
+      run:
+        working-directory: apps/api
+    env:
+      INTEYLO_TEST_ADMIN_URL: postgresql+psycopg://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: apps/api/requirements.lock
+      - name: Installation
+        run: pip install -r requirements.lock -e ".[dev]"
+      - name: Formatage et lint (Ruff)
+        run: ruff format --check . && ruff check .
+      - name: Types (mypy strict)
+        run: mypy app
+      - name: Tests (unitaires, intégration, RBAC, multi-tenant, langue)
+        run: pytest --cov=app --cov-report=xml --cov-report=term
+      - name: Analyse statique (Bandit)
+        run: bandit -q -r app -ll
+      - name: Audit des dépendances (pip-audit)
+        run: pip-audit -r requirements.lock --strict
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: couverture-api
+          path: apps/api/coverage.xml
+
+  web:
+    name: Web — lint, langue, types, tests, build
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - name: Lint (dont textes littéraux interdits dans le JSX)
+        run: npm run lint
+      - name: Contrôle linguistique du catalogue fr
+        run: npm run i18n:check
+      - name: Types
+        run: npm run typecheck
+      - name: Tests unitaires
+        run: npm test
+      - name: Build de production
+        run: npm run build
+      - name: Audit des dépendances
+        run: npm audit --omit=dev --audit-level=high
+
+  e2e:
+    name: Bout en bout (Playwright)
+    runs-on: ubuntu-24.04
+    needs: [api, web]
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      E2E_API_PYTHON: python
+      E2E_DATABASE_URL: postgresql+psycopg://inteylo_app:app-dev-password@127.0.0.1:5432/inteylo_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: apps/api/requirements.lock
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - name: API et base de test
+        working-directory: apps/api
+        run: |
+          pip install -r requirements.lock
+          python scripts/bootstrap_db.py --admin-url postgresql+psycopg://postgres:postgres@127.0.0.1:5432/postgres --database inteylo_e2e --reset
+      - name: Navigateur
+        working-directory: apps/web
+        run: npm ci && npx playwright install --with-deps chromium
+      - name: Tests de bout en bout
+        working-directory: apps/web
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: rapport-playwright
+          path: apps/web/playwright-report
+
+  security:
+    name: Secrets et analyse statique
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan des secrets (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Semgrep
+        run: |
+          python3 -m pip install --quiet semgrep
+          semgrep scan --config p/python --config p/typescript --config p/secrets --error --severity ERROR apps
+
+  images:
+    name: Images Docker — build, scan, publication
+    runs-on: ubuntu-24.04
+    needs: [api, web, e2e, security]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: [api, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/${{ matrix.app }}
+          load: true
+          tags: inteylo/${{ matrix.app }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+      - name: Scan de l'image (Trivy)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: inteylo/${{ matrix.app }}:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: Connexion à GHCR
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publication (tag = SHA du commit, immuable)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/${{ matrix.app }}:${{ github.sha }}
+          docker tag inteylo/${{ matrix.app }}:${{ github.sha }} "$IMAGE"
+          docker push "$IMAGE"

@@ -1,0 +1,184 @@
+@startuml INTEYLO_modele_domaine
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide methods
+title INTEYLO — Modèle de domaine (cible ; en vert : implémenté en phase 1)
+
+package "Identité et accès (phase 1)" #E1F5EE {
+  class Organization {
+    id : UUID
+    name
+    status : active | suspended
+    locale = "fr"
+    timezone
+    created_at
+  }
+  class User {
+    id : UUID
+    email (unique, minuscules)
+    full_name
+    password_hash (argon2id)
+    is_active
+    is_platform_admin
+  }
+  class Membership {
+    id : UUID
+    org_id : UUID
+    user_id : UUID
+    status : active | disabled
+  }
+  class Role {
+    key
+    scope : organization | platform
+    rank
+    is_system
+  }
+  class Permission {
+    key
+    scope : organization | platform
+  }
+  class MembershipRole <<UserRole>> {
+    membership_id
+    role_key
+  }
+  class RolePermission {
+    role_key
+    permission_key
+  }
+  class Invitation {
+    id : UUID
+    org_id
+    email
+    role_key
+    token_hash
+    expires_at
+    accepted_at
+    revoked_at
+  }
+  class Session {
+    id : UUID
+    user_id
+    token_hash
+    expires_at
+    revoked_at
+  }
+  class AuditEvent {
+    id : UUID
+    org_id (nullable)
+    actor_user_id
+    action
+    outcome : success | denied | failure
+    target_type / target_id
+    details : JSONB
+    created_at
+  }
+}
+
+package "Intégration et données (phase 2)" {
+  class Connection {
+    org_id
+    system
+    status
+    scopes
+    last_sync_at
+  }
+  class ConnectorCredentialReference {
+    connection_id
+    vault_path
+    rotated_at
+  }
+  class IngestDelivery {
+    org_id
+    connection_id
+    delivery_id (unique par connexion)
+    fingerprint_jcs
+    status : ACCEPTED | VERIFIED | UNCERTAIN | DUPLICATE | REJECTED
+    reason
+  }
+  class SourceRecord {
+    org_id
+    connection_id
+    external_type
+    external_id
+    occurred_at
+    source_version
+    payload
+    deleted_at
+  }
+  class CanonicalEntity {
+    org_id
+    type
+    attributes
+  }
+  class EntityLink {
+    org_id
+    confidence
+    justification
+    status : proposed | confirmed | rejected
+  }
+  class MetricDefinition {
+    key
+    version
+    formula
+    unit / currency
+    timezone
+  }
+  class MetricObservation {
+    org_id
+    period
+    value
+  }
+  class EvidenceReference {
+    org_id
+    source_kind
+    reference
+    data_version
+  }
+}
+
+package "Intelligence, actions et mémoire (phases 3 et 4)" {
+  class Insight
+  class Decision
+  class ActionPlan
+  class ActionExecution {
+    state : REQUESTED … VERIFIED | UNCERTAIN
+    idempotency_key
+  }
+  class Approval
+  class Workflow
+  class MemoryEntry {
+    kind : factual | contextual | decision | outcome
+    valid_from / valid_to
+    confidence
+  }
+  class Notification
+}
+
+Organization "1" -- "*" Membership
+User "1" -- "*" Membership
+Membership "1" -- "1..*" MembershipRole
+MembershipRole "*" -- "1" Role
+Role "1" -- "*" RolePermission
+RolePermission "*" -- "1" Permission
+Organization "1" -- "*" Invitation
+User "1" -- "*" Session
+Organization "0..1" -- "*" AuditEvent
+
+Organization "1" -- "*" Connection
+Connection "1" -- "1" ConnectorCredentialReference
+Connection "1" -- "*" IngestDelivery
+IngestDelivery "1" -- "*" SourceRecord
+SourceRecord "*" -- "*" CanonicalEntity : normalise >
+CanonicalEntity "1" -- "*" EntityLink
+MetricDefinition "1" -- "*" MetricObservation
+MetricObservation "*" -- "*" EvidenceReference
+
+Insight "*" -- "*" EvidenceReference
+Decision "*" -- "*" Insight
+Decision "1" -- "*" ActionPlan
+ActionPlan "1" -- "*" ActionExecution
+ActionExecution "1" -- "*" Approval
+Workflow "1" -- "*" ActionExecution
+MemoryEntry "*" -- "*" Decision
+MemoryEntry "*" -- "*" EvidenceReference
+@enduml

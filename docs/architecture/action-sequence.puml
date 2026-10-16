@@ -1,0 +1,50 @@
+@startuml INTEYLO_sequence_action
+skinparam shadowing false
+title INTEYLO — Cycle de vie d'une action contrôlée (cible phase 4)
+
+actor "Opérateur" as OP
+actor "Approbateur" as AP
+participant "API" as API
+participant "Moteur de politiques" as POL
+participant "Moteur d'actions" as ACT
+participant "Worker" as W
+participant "Système externe" as EXT
+database "Audit" as AUD
+
+OP -> API : proposer l'action (clé d'idempotence)
+API -> ACT : créer ActionExecution [REQUESTED]
+ACT -> POL : vérifier tenant, permission, risque, limites
+alt refus
+  POL --> ACT : refusée
+  ACT -> AUD : action refusée
+  ACT --> OP : [REJECTED] + motif en français
+else autorisée
+  POL --> ACT : [POLICY_CHECKED]
+  opt approbation requise
+    ACT -> AP : demande d'approbation (aperçu exact)
+    AP -> API : approuver (≠ demandeur si séparation des tâches)
+    API -> POL : revérifier la permission actions.approve
+    API -> ACT : [APPROVED]
+  end
+  ACT -> W : exécuter [EXECUTING]
+  W -> EXT : appel avec clé d'idempotence
+  alt réponse reçue
+    EXT --> W : réponse
+    W -> ACT : [EXECUTED]
+    W -> EXT : relecture de l'état réel
+    alt effet confirmé
+      W -> ACT : [VERIFIED]
+    else effet non confirmé
+      W -> ACT : [UNCERTAIN]
+    end
+  else délai dépassé / 5xx
+    W -> ACT : [UNCERTAIN]
+    note over W, EXT
+      Jamais de relance aveugle :
+      relire l'état chez le fournisseur
+      avant toute nouvelle tentative.
+    end note
+  end
+  ACT -> AUD : demandeur, approbateur, exécution, résultat
+end
+@enduml

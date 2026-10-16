@@ -1,0 +1,339 @@
+{
+  "meta": {
+    "title": "INTEYLO",
+    "titleTemplate": "%s · INTEYLO",
+    "description": "Plateforme d'intelligence opérationnelle : données reliées, décisions justifiées, actions vérifiées."
+  },
+  "brand": {
+    "name": "INTEYLO",
+    "tagline": "Toutes vos données. Une vision claire. Des décisions justifiées. Des actions vérifiées."
+  },
+  "common": {
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "copy": "Copier",
+    "copied": "Lien copié",
+    "logout": "Se déconnecter",
+    "emptyValue": "—",
+    "unexpectedError": "Une erreur inattendue est survenue. Veuillez réessayer.",
+    "networkError": "Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez."
+  },
+  "nav": {
+    "workspace": "Espace de travail",
+    "overview": "Vue d'ensemble",
+    "members": "Membres",
+    "audit": "Audit et incidents",
+    "account": "Mon compte",
+    "platform": "Administration de la plateforme",
+    "mainNavigation": "Navigation principale",
+    "skipToContent": "Aller au contenu principal"
+  },
+  "home": {
+    "title": "L'intelligence opérationnelle de votre organisation",
+    "pillars": {
+      "intelligence": {
+        "title": "Intelligence transversale",
+        "text": "Relier les données de vos outils pour comprendre ce qui se passe réellement."
+      },
+      "actions": {
+        "title": "Actions vérifiées",
+        "text": "Agir dans les limites des autorisations, puis confirmer le résultat réel."
+      },
+      "memory": {
+        "title": "Mémoire décisionnelle",
+        "text": "Conserver les décisions, leurs motifs et leurs résultats observés."
+      }
+    },
+    "cta": {
+      "signup": "Créer un compte",
+      "login": "Se connecter"
+    }
+  },
+  "auth": {
+    "fields": {
+      "email": "Adresse e-mail",
+      "password": "Mot de passe",
+      "fullName": "Nom complet",
+      "organizationName": "Nom de l'organisation",
+      "passwordHint": "Au moins 12 caractères."
+    },
+    "login": {
+      "pageTitle": "Connexion",
+      "title": "Connexion",
+      "subtitle": "Accédez à votre espace INTEYLO.",
+      "submit": "Se connecter",
+      "submitting": "Connexion en cours…",
+      "noAccount": "Pas encore de compte ?",
+      "createAccount": "Créer un compte"
+    },
+    "signup": {
+      "pageTitle": "Inscription",
+      "title": "Créer votre organisation",
+      "subtitle": "Vous en deviendrez le propriétaire et pourrez inviter votre équipe.",
+      "submit": "Créer mon compte",
+      "submitting": "Création en cours…",
+      "hasAccount": "Vous avez déjà un compte ?",
+      "login": "Se connecter"
+    }
+  },
+  "invitation": {
+    "pageTitle": "Invitation",
+    "title": "Rejoindre une organisation",
+    "intro": "Vous êtes invité à rejoindre « {organization} » en tant que {role}.",
+    "forEmail": "Invitation destinée à {email}.",
+    "missingToken": "Ce lien d'invitation est incomplet. Demandez un nouveau lien à la personne qui vous a invité.",
+    "acceptAsCurrent": "Accepter l'invitation",
+    "wrongAccount": "Vous êtes connecté avec {email}, qui ne correspond pas à cette invitation. Déconnectez-vous puis rouvrez le lien.",
+    "loginFirst": "Un compte existe déjà pour cette adresse. Connectez-vous pour accepter l'invitation.",
+    "goToLogin": "Aller à la connexion",
+    "createAndJoin": "Créer mon compte et rejoindre l'organisation"
+  },
+  "workspace": {
+    "pageTitle": "Espace de travail",
+    "title": "Bonjour, {name}",
+    "description": "Choisissez l'organisation dans laquelle vous souhaitez travailler.",
+    "open": "Ouvrir",
+    "empty": {
+      "title": "Vous n'êtes membre d'aucune organisation active.",
+      "description": "Demandez une invitation à un administrateur, ou créez une nouvelle organisation."
+    }
+  },
+  "organization": {
+    "pageTitle": "Organisation",
+    "description": "Vue d'ensemble de l'organisation et de vos droits.",
+    "identity": {
+      "title": "Identité",
+      "createdAt": "Créée le",
+      "timezone": "Fuseau horaire",
+      "yourRoles": "Vos rôles"
+    },
+    "permissions": {
+      "title": "Vos autorisations"
+    },
+    "settings": {
+      "title": "Paramètres de l'organisation",
+      "name": "Nom",
+      "timezone": "Fuseau horaire",
+      "timezoneHint": "Identifiant IANA, par exemple Africa/Tunis ou Europe/Paris.",
+      "saved": "Les paramètres ont été enregistrés."
+    },
+    "modules": {
+      "title": "Modules",
+      "soon": "Bientôt disponible",
+      "description": "Ces modules seront activés au fil des prochaines phases, après validation de leurs critères de qualité."
+    }
+  },
+  "members": {
+    "pageTitle": "Membres",
+    "title": "Membres et invitations",
+    "description": "Gérez qui accède à l'organisation et avec quels droits.",
+    "invite": {
+      "title": "Inviter une personne",
+      "email": "Adresse e-mail",
+      "role": "Rôle",
+      "submit": "Créer l'invitation",
+      "created": "Invitation créée pour {email}.",
+      "linkHelp": "Transmettez ce lien à la personne invitée par un canal de confiance. Il ne sera plus affiché.",
+      "linkLabel": "Lien d'invitation"
+    },
+    "list": {
+      "title": "{count, plural, one {# membre} other {# membres}}",
+      "name": "Nom",
+      "roles": "Rôles",
+      "status": "Statut",
+      "joinedAt": "Arrivée",
+      "actions": "Actions",
+      "you": "Vous",
+      "changeRole": "Modifier le rôle de {name}",
+      "changeRolePlaceholder": "Changer de rôle…",
+      "disable": "Désactiver",
+      "enable": "Réactiver"
+    },
+    "invitations": {
+      "title": "Invitations",
+      "empty": "Aucune invitation pour le moment.",
+      "email": "Adresse e-mail",
+      "role": "Rôle",
+      "status": "Statut",
+      "expiresAt": "Expire le",
+      "invitedBy": "Invité par {name}",
+      "revoke": "Révoquer"
+    }
+  },
+  "audit": {
+    "pageTitle": "Audit",
+    "title": "Journal d'audit",
+    "description": "Opérations significatives et refus d'accès, en ajout seul. Heures affichées dans le fuseau {timezone}.",
+    "empty": "Aucun événement enregistré.",
+    "columns": {
+      "date": "Date",
+      "action": "Opération",
+      "outcome": "Résultat",
+      "actor": "Auteur",
+      "ip": "Adresse IP"
+    },
+    "systemActor": "Système",
+    "previous": "Page précédente",
+    "next": "Page suivante"
+  },
+  "account": {
+    "pageTitle": "Mon compte",
+    "title": "Mon compte",
+    "description": "Vos informations et vos sessions ouvertes.",
+    "profile": {
+      "title": "Profil",
+      "name": "Nom",
+      "email": "Adresse e-mail"
+    },
+    "sessions": {
+      "title": "Sessions actives",
+      "description": "Révoquez toute session que vous ne reconnaissez pas.",
+      "current": "Cette session",
+      "other": "Autre session",
+      "lastSeen": "Dernière activité : {date}",
+      "revoke": "Révoquer",
+      "revokeOthers": "Révoquer les autres sessions",
+      "revokedOthers": "{count, plural, =0 {Aucune autre session n'était ouverte.} one {# session a été révoquée.} other {# sessions ont été révoquées.}}"
+    }
+  },
+  "platform": {
+    "pageTitle": "Plateforme",
+    "title": "Administration de la plateforme",
+    "description": "Organisations clientes. Vous ne voyez ni leurs membres ni leurs données.",
+    "forbidden": "Cette page est réservée au super-administrateur de la plateforme.",
+    "columns": {
+      "name": "Organisation",
+      "status": "Statut",
+      "members": "Membres actifs",
+      "createdAt": "Créée le"
+    },
+    "suspend": "Suspendre",
+    "reactivate": "Réactiver"
+  },
+  "roles": {
+    "platform_super_admin": "Super-administrateur de la plateforme",
+    "org_owner": "Propriétaire de l'organisation",
+    "org_admin": "Administrateur de l'organisation",
+    "analyst": "Analyste",
+    "operator": "Opérateur",
+    "viewer": "Lecteur",
+    "approver": "Approbateur"
+  },
+  "permissions": {
+    "organizations_read": "Consulter l'organisation",
+    "organizations_manage": "Gérer les paramètres de l'organisation",
+    "users_read": "Consulter les membres",
+    "users_invite": "Inviter des membres",
+    "users_manage": "Gérer les membres",
+    "roles_read": "Consulter les rôles",
+    "roles_manage": "Attribuer les rôles",
+    "connectors_read": "Consulter les connecteurs",
+    "connectors_configure": "Configurer les connecteurs",
+    "analytics_read": "Consulter les analyses",
+    "analytics_run": "Lancer des analyses",
+    "reports_create": "Créer des rapports",
+    "actions_propose": "Proposer des actions",
+    "actions_approve": "Approuver des actions",
+    "actions_execute": "Exécuter des actions",
+    "memory_read": "Consulter la mémoire décisionnelle",
+    "memory_manage": "Gérer la mémoire décisionnelle",
+    "audit_read": "Consulter l'audit",
+    "billing_manage": "Gérer la facturation",
+    "platform_organizations_read": "Consulter les organisations de la plateforme",
+    "platform_organizations_suspend": "Suspendre des organisations",
+    "platform_audit_read": "Consulter l'audit de la plateforme"
+  },
+  "auditActions": {
+    "auth_signup": "Création de compte",
+    "auth_login": "Connexion",
+    "auth_logout": "Déconnexion",
+    "auth_session_revoked": "Session révoquée",
+    "auth_other_sessions_revoked": "Autres sessions révoquées",
+    "organization_created": "Organisation créée",
+    "organization_updated": "Paramètres modifiés",
+    "organization_access": "Accès à l'organisation",
+    "permission_check": "Contrôle d'autorisation",
+    "member_roles_updated": "Rôles modifiés",
+    "member_roles_update": "Modification de rôles",
+    "member_disabled": "Membre désactivé",
+    "member_enabled": "Membre réactivé",
+    "invitation_created": "Invitation créée",
+    "invitation_create": "Création d'invitation",
+    "invitation_revoked": "Invitation révoquée",
+    "invitation_accepted": "Invitation acceptée",
+    "platform_access": "Accès à l'administration de la plateforme",
+    "platform_admin_promoted": "Promotion super-administrateur",
+    "platform_organization_suspended": "Organisation suspendue",
+    "platform_organization_reactivated": "Organisation réactivée"
+  },
+  "statuses": {
+    "member": {
+      "active": "Actif",
+      "disabled": "Désactivé"
+    },
+    "invitation": {
+      "pending": "En attente",
+      "accepted": "Acceptée",
+      "revoked": "Révoquée",
+      "expired": "Expirée"
+    },
+    "outcome": {
+      "success": "Réussi",
+      "denied": "Refusé",
+      "failure": "Échec"
+    },
+    "organization": {
+      "active": "Active",
+      "suspended": "Suspendue"
+    }
+  },
+  "actionStates": {
+    "REQUESTED": "Demandée",
+    "POLICY_CHECKED": "Contrôlée",
+    "AWAITING_APPROVAL": "En attente d'approbation",
+    "APPROVED": "Approuvée",
+    "EXECUTING": "En cours",
+    "EXECUTED": "Exécutée",
+    "VERIFIED": "Vérifiée",
+    "FAILED": "Échouée",
+    "REJECTED": "Refusée",
+    "CANCELLED": "Annulée",
+    "UNCERTAIN": "Résultat incertain"
+  },
+  "modules": {
+    "workspace": "Espace de travail",
+    "dashboard": "Tableau de bord",
+    "connectorHub": "Centre des connecteurs",
+    "businessGraph": "Graphe métier",
+    "metricRegistry": "Référentiel des indicateurs",
+    "evidenceEngine": "Preuves et sources",
+    "opportunityRadar": "Radar d'opportunités",
+    "decisionSimulator": "Simulateur de décisions",
+    "actionEngine": "Actions",
+    "approvalCenter": "Centre d'approbation",
+    "decisionMemory": "Mémoire décisionnelle",
+    "auditCenter": "Audit et incidents",
+    "marketing": "Marketing",
+    "socialHub": "Réseaux sociaux",
+    "conversion": "Conversions",
+    "crmSales": "Ventes et relation client",
+    "support": "Support client",
+    "projectsOperations": "Projets et opérations",
+    "financeBilling": "Finance et facturation",
+    "predictive": "Prévisions",
+    "insight": "Constat",
+    "workflow": "Processus"
+  },
+  "connectorStates": {
+    "available": "Disponible à configurer",
+    "incomplete": "Configuration incomplète",
+    "auth_required": "Authentification requise",
+    "connected": "Connecté",
+    "syncing": "Synchronisation en cours",
+    "synced": "Synchronisation réussie",
+    "sync_error": "Erreur de synchronisation",
+    "auth_expired": "Autorisation expirée",
+    "limited": "Fonctionnalités limitées par le fournisseur",
+    "disabled": "Désactivé"
+  }
+}
